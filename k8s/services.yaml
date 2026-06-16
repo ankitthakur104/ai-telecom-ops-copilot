@@ -1,0 +1,35 @@
+apiVersion: v1
+  kind: Service
+  metadata:
+    name: telecom-copilot-api
+    namespace: telecom-ops
+  spec:
+    selector:
+      app: telecom-copilot
+      component: api
+    ports:
+      - name: http
+        port: 80
+        targetPort: 8000
+    type: ClusterIP
+  ---
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: telecom-copilot-ingress
+    namespace: telecom-ops
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+  spec:
+    rules:
+      - host: copilot.telecom-ops.internal
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: telecom-copilot-api
+                  port:
+                    number: 80
+  
