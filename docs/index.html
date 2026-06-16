@@ -219,7 +219,7 @@
     </div>
     <div class="topbar-right">
       <div class="status-pill"><div class="pulse"></div>7 Agents Active</div>
-      <div style="font-size:12px;color:var(--muted)">Operators: <span style="color:var(--text)">Halotel · Ncell · Vodacom</span></div>
+      <div style="font-size:12px;color:var(--muted)">Operators: <span style="color:var(--text)">Operator Alpha · Operator Beta · Operator Gamma</span></div>
       <div class="clock" id="clock">--:--:-- UTC</div>
     </div>
   </div>
@@ -340,9 +340,9 @@
       <div class="panel">
         <div class="panel-header">Knowledge Graph (Neo4j)</div>
         <div style="padding:20px;font-size:12px">
-          <div style="color:var(--muted);margin-bottom:14px">Incident dependency paths for Halotel Tanzania</div>
+          <div style="color:var(--muted);margin-bottom:14px">Incident dependency paths for Operator Alpha</div>
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);line-height:1.8">
-            Halotel<br>
+            Operator Alpha<br>
             &nbsp;&nbsp;→ billing_api<br>
             &nbsp;&nbsp;&nbsp;&nbsp;→ <span style="color:var(--red)">connection_pool_exhaustion</span><br>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ crbt_provisioning<br>
@@ -409,7 +409,7 @@
     <div class="predictive-grid">
       <div class="pred-card">
         <div class="pred-svc">crbt_provisioning</div>
-        <div class="pred-op">Halotel Tanzania</div>
+        <div class="pred-op">Operator Alpha</div>
         <div class="pred-prob-row"><div class="pred-prob crit">87%</div><div class="pred-eta">⏱ ~2.5 hours</div></div>
         <div class="pred-bar-wrap"><div class="pred-bar" style="width:87%;background:var(--red)"></div></div>
         <div class="pred-signals">
@@ -421,7 +421,7 @@
       </div>
       <div class="pred-card">
         <div class="pred-svc">billing_api</div>
-        <div class="pred-op">Halotel Tanzania</div>
+        <div class="pred-op">Operator Alpha</div>
         <div class="pred-prob-row"><div class="pred-prob high">72%</div><div class="pred-eta">⏱ ~4 hours</div></div>
         <div class="pred-bar-wrap"><div class="pred-bar" style="width:72%;background:var(--amber)"></div></div>
         <div class="pred-signals">
@@ -432,7 +432,7 @@
       </div>
       <div class="pred-card">
         <div class="pred-svc">smsc</div>
-        <div class="pred-op">Ncell Nepal</div>
+        <div class="pred-op">Operator Beta</div>
         <div class="pred-prob-row"><div class="pred-prob med">43%</div><div class="pred-eta">⏱ ~8 hours</div></div>
         <div class="pred-bar-wrap"><div class="pred-bar" style="width:43%;background:var(--amber)"></div></div>
         <div class="pred-signals">
@@ -443,7 +443,7 @@
       </div>
       <div class="pred-card">
         <div class="pred-svc">vas_subscription</div>
-        <div class="pred-op">Vodacom Tanzania</div>
+        <div class="pred-op">Operator Gamma</div>
         <div class="pred-prob-row"><div class="pred-prob" style="color:var(--green)">12%</div><div class="pred-eta">⏱ Low risk</div></div>
         <div class="pred-bar-wrap"><div class="pred-bar" style="width:12%;background:var(--green)"></div></div>
         <div class="pred-signals">
@@ -481,15 +481,15 @@
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
           
           <div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Halotel Tanzania</span><span style="color:var(--green);font-weight:600">97.3%</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Operator Alpha</span><span style="color:var(--green);font-weight:600">97.3%</span></div>
             <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px"><div style="width:97.3%;height:100%;background:var(--green);border-radius:4px"></div></div>
           </div>
           <div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Ncell Nepal</span><span style="color:var(--green);font-weight:600">99.1%</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Operator Beta</span><span style="color:var(--green);font-weight:600">99.1%</span></div>
             <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px"><div style="width:99.1%;height:100%;background:var(--green);border-radius:4px"></div></div>
           </div>
           <div>
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Vodacom Tanzania</span><span style="color:var(--green);font-weight:600">98.8%</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Operator Gamma</span><span style="color:var(--green);font-weight:600">98.8%</span></div>
             <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px"><div style="width:98.8%;height:100%;background:var(--green);border-radius:4px"></div></div>
           </div>
         </div>
@@ -545,7 +545,7 @@
       <div class="modal-subtitle">This action requires your explicit approval before execution. Safety class: ASSISTED</div>
       <div class="modal-action">
         <div class="modal-action-title" id="modal-action-title">Increase DB Connection Pool</div>
-        <div class="modal-action-desc" id="modal-action-desc">Submit request to increase PgBouncer pool_size from 50 to 150 on db_primary (Halotel). This configuration change will increase memory usage by ~300MB.</div>
+        <div class="modal-action-desc" id="modal-action-desc">Submit request to increase PgBouncer pool_size from 50 to 150 on db_primary (Operator Alpha). This configuration change will increase memory usage by ~300MB.</div>
       </div>
       <div class="modal-risk">⚠ Risk Level: MEDIUM · This action modifies a running service configuration. Changes take effect immediately on pool reload.</div>
       <div class="modal-btns">
@@ -557,24 +557,24 @@
 
   <script>
   // ─── Data ───────────────────────────────────────────────────────────────────
-  const OPERATORS = ['halotel','ncell','vodacom'];
+  const OPERATORS = ['alpha','beta','gamma'];
   const SERVICES = ['billing_api','crbt_provisioning','db_primary','smsc','ussd_gateway','charging_platform','vas_subscription','kafka','crm_api'];
   const METRICS = ['api_latency_p99','activation_success_rate','cpu_utilization','error_rate','queue_depth','consumer_lag','delivery_failure_rate','connection_count'];
   const SEVERITIES = ['P1','P1','P2','P2','P3','P4'];
-  const OP_LABELS = {halotel:'Halotel 🇹🇿',ncell:'Ncell 🇳🇵',vodacom:'Vodacom 🇹🇿'};
+  const OP_LABELS = {alpha:'Operator Alpha',beta:'Operator Beta',gamma:'Operator Gamma'};
   const SVC_HEALTH = {
-    billing_api:{status:'warn',op:'halotel'},crbt_provisioning:{status:'crit',op:'halotel'},
-    db_primary:{status:'crit',op:'halotel'},smsc:{status:'ok',op:'ncell'},
-    ussd_gateway:{status:'ok',op:'ncell'},charging_platform:{status:'warn',op:'halotel'},
-    vas_subscription:{status:'ok',op:'vodacom'},kafka:{status:'ok',op:'all'},
-    crm_api:{status:'ok',op:'vodacom'},elasticsearch:{status:'ok',op:'all'},
-    redis_cache:{status:'ok',op:'all'},api_gateway:{status:'warn',op:'halotel'}
+    billing_api:{status:'warn',op:'alpha'},crbt_provisioning:{status:'crit',op:'alpha'},
+    db_primary:{status:'crit',op:'alpha'},smsc:{status:'ok',op:'beta'},
+    ussd_gateway:{status:'ok',op:'beta'},charging_platform:{status:'warn',op:'alpha'},
+    vas_subscription:{status:'ok',op:'gamma'},kafka:{status:'ok',op:'all'},
+    crm_api:{status:'ok',op:'gamma'},elasticsearch:{status:'ok',op:'all'},
+    redis_cache:{status:'ok',op:'all'},api_gateway:{status:'warn',op:'alpha'}
   };
 
   const INCIDENTS = [
-    {id:'INC-001',title:'DB Bottleneck — Activation Failure',sev:'P1',op:'halotel',status:'investigating',time:'2m ago',category:'database_bottleneck'},
-    {id:'INC-002',title:'Billing API Timeout — VAS Degraded',sev:'P1',op:'halotel',status:'open',time:'7m ago',category:'billing_timeout'},
-    {id:'INC-003',title:'Charging Platform Slow Response',sev:'P2',op:'vodacom',status:'investigating',time:'18m ago',category:'generic'},
+    {id:'INC-001',title:'DB Bottleneck — Activation Failure',sev:'P1',op:'alpha',status:'investigating',time:'2m ago',category:'database_bottleneck'},
+    {id:'INC-002',title:'Billing API Timeout — VAS Degraded',sev:'P1',op:'alpha',status:'open',time:'7m ago',category:'billing_timeout'},
+    {id:'INC-003',title:'Charging Platform Slow Response',sev:'P2',op:'gamma',status:'investigating',time:'18m ago',category:'generic'},
   ];
 
   const RCA_DATA = {
@@ -721,10 +721,10 @@ cpu_utilization: 74%',rel:0.80},
 
   function injectAlert(){
     const scenarios=[
-      {svc:'db_primary',sev:'P1',op:'halotel',metric:'cpu_utilization',val:'94.2%'},
-      {svc:'crbt_provisioning',sev:'P1',op:'halotel',metric:'activation_success_rate',val:'23.1%'},
-      {svc:'billing_api',sev:'P1',op:'halotel',metric:'api_latency_p99',val:'8420ms'},
-      {svc:'kafka',sev:'P2',op:'halotel',metric:'consumer_lag',val:'847,234'},
+      {svc:'db_primary',sev:'P1',op:'alpha',metric:'cpu_utilization',val:'94.2%'},
+      {svc:'crbt_provisioning',sev:'P1',op:'alpha',metric:'activation_success_rate',val:'23.1%'},
+      {svc:'billing_api',sev:'P1',op:'alpha',metric:'api_latency_p99',val:'8420ms'},
+      {svc:'kafka',sev:'P2',op:'alpha',metric:'consumer_lag',val:'847,234'},
     ];
     scenarios.forEach((s,i)=>setTimeout(()=>addAlert({...s,isNew:true}),i*400));
     setTimeout(()=>{
@@ -757,9 +757,9 @@ cpu_utilization: 74%',rel:0.80},
 
   function addIncident(){
     const templates=[
-      {title:'Kafka Consumer Lag — Processing Stalled',sev:'P2',op:'ncell',category:'generic'},
-      {title:'SMSC Queue Saturation — SMS Degraded',sev:'P2',op:'ncell',category:'generic'},
-      {title:'Redis Cache Miss Storm — High DB Load',sev:'P3',op:'vodacom',category:'generic'},
+      {title:'Kafka Consumer Lag — Processing Stalled',sev:'P2',op:'beta',category:'generic'},
+      {title:'SMSC Queue Saturation — SMS Degraded',sev:'P2',op:'beta',category:'generic'},
+      {title:'Redis Cache Miss Storm — High DB Load',sev:'P3',op:'gamma',category:'generic'},
     ];
     const t = templates[Math.floor(Math.random()*templates.length)];
     incidents.unshift({...t,id:'INC-'+(100+incidents.length+1),status:'open',time:'just now'});
@@ -942,7 +942,7 @@ cpu_utilization: 74%',rel:0.80},
       ]},
       {agent:'root_cause_analysis',color:'var(--purple)',logs:[
         'RAG retrieval: 2 historical incidents matched',
-        'Neo4j traversal: halotel→billing_api→connection_pool→crbt_provisioning',
+        'Neo4j traversal: alpha→billing_api→connection_pool→crbt_provisioning',
         'LLM reasoning over 8 evidence items (GPT-4o tool calls)...',
         'Hypothesis 1: Connection Pool Exhaustion (0.92) ← PRIMARY',
         'Hypothesis 2: Missing Index (0.05)',
@@ -968,7 +968,7 @@ cpu_utilization: 74%',rel:0.80},
         'Running LSTM + Isolation Forest over 6h metrics...',
         'crbt_provisioning: 87% failure probability (↑ +10% from current incident)',
         'billing_api: 72% failure probability in ~4h',
-        'smsc (ncell): 43% — monitor queue depth',
+        'smsc (beta): 43% — monitor queue depth',
         '✓ 4 services analyzed | 2 critical risk | 1 high risk',
       ]},
       {agent:'learning_agent',color:'var(--dim)',logs:[
