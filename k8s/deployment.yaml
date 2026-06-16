@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: telecom-copilot-api
+    namespace: telecom-ops
+    labels:
+      app: telecom-copilot
+      component: api
+  spec:
+    replicas: 3
+    selector:
+      matchLabels:
+        app: telecom-copilot
+        component: api
+    template:
+      metadata:
+        labels:
+          app: telecom-copilot
+          component: api
+      spec:
+        containers:
+          - name: api
+            image: telecom-copilot:latest
+            ports:
+              - containerPort: 8000
+            envFrom:
+              - configMapRef:
+                  name: telecom-copilot-config
+              - secretRef:
+                  name: telecom-copilot-secrets
+            resources:
+              requests:
+                cpu: "500m"
+                memory: "512Mi"
+              limits:
+                cpu: "2000m"
+                memory: "2Gi"
+            readinessProbe:
+              httpGet:
+                path: /api/healthz
+                port: 8000
+              initialDelaySeconds: 10
+              periodSeconds: 10
+            livenessProbe:
+              httpGet:
+                path: /api/healthz
+                port: 8000
+              initialDelaySeconds: 30
+              periodSeconds: 30
+  
