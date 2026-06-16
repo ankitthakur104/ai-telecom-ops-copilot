@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Telecom Ops Copilot — CRBT/VAS Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#060b18;--card:#0c1428;--card2:#101c35;--border:#1a2d4f;--border2:#243d6a;
+    --text:#e2e8f0;--muted:#64748b;--dim:#94a3b8;
+    --green:#10d48c;--amber:#f59e0b;--red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;--cyan:#06b6d4;
+    --p1:#ef4444;--p2:#f97316;--p3:#eab308;--p4:#22c55e;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+  .topbar{background:#0a101f;border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-shrink:0}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
+  .logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .status-pill{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);background:rgba(16,212,140,.1);border:1px solid rgba(16,212,140,.25);border-radius:20px;padding:4px 12px}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+  .clock{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--dim)}
+  .topbar-right{display:flex;align-items:center;gap:16px}
+  .badge{background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;min-width:20px;text-align:center}
+
+  /* Tabs */
+  .tabs{background:#0a101f;border-bottom:1px solid var(--border);padding:0 24px;display:flex;gap:0;flex-shrink:0}
+  .tab{padding:12px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+  .tab:hover{color:var(--text)}
+  .tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+
+  /* Main layout */
+  .main{flex:1;overflow-y:auto;padding:20px 24px}
+  .view{display:none}.view.active{display:block}
+
+  /* KPI cards */
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+  .kpi-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+  .kpi-val{font-size:28px;font-weight:700;line-height:1}
+  .kpi-sub{font-size:11px;color:var(--muted);margin-top:6px}
+  .kpi.green .kpi-val{color:var(--green)}
+  .kpi.red .kpi-val{color:var(--red)}
+  .kpi.amber .kpi-val{color:var(--amber)}
+  .kpi.blue .kpi-val{color:var(--blue)}
+
+  /* Grid */
+  .ops-grid{display:grid;grid-template-columns:280px 1fr 220px;gap:14px}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .panel-header{padding:14px 16px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);display:flex;align-items:center;justify-content:space-between}
+  .panel-body{overflow-y:auto;max-height:460px}
+
+  /* Alert feed */
+  .alert-item{padding:10px 14px;border-bottom:1px solid rgba(26,45,79,.5);cursor:default;transition:background .15s;display:flex;flex-direction:column;gap:3px}
+  .alert-item:hover{background:var(--card2)}
+  .alert-item:last-child{border-bottom:none}
+  .alert-svc{font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .alert-meta{font-size:10px;color:var(--muted)}
+  .alert-val{font-size:10px;color:var(--amber);font-family:'JetBrains Mono',monospace}
+  .sev-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px}
+  .sev-P1{background:rgba(239,68,68,.2);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+  .sev-P2{background:rgba(249,115,22,.2);color:#fb923c;border:1px solid rgba(249,115,22,.3)}
+  .sev-P3{background:rgba(234,179,8,.2);color:#fbbf24;border:1px solid rgba(234,179,8,.3)}
+  .sev-P4{background:rgba(34,197,94,.2);color:#4ade80;border:1px solid rgba(34,197,94,.3)}
+  .op-badge{font-size:9px;font-weight:500;padding:1px 5px;border-radius:4px;background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.25)}
+  .new-tag{font-size:9px;background:var(--green);color:#000;padding:1px 5px;border-radius:3px;font-weight:700;animation:fadeIn .3s}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+  /* Incidents */
+  .incident-item{padding:14px 16px;border-bottom:1px solid rgba(26,45,79,.5);cursor:pointer;transition:background .15s}
+  .incident-item:hover,.incident-item.selected{background:var(--card2);border-left:2px solid var(--blue)}
+  .incident-item:last-child{border-bottom:none}
+  .incident-title{font-size:13px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .incident-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .incident-time{font-size:10px;color:var(--muted)}
+  .incident-status{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500}
+  .status-open{background:rgba(239,68,68,.15);color:#f87171}
+  .status-investigating{background:rgba(249,115,22,.15);color:#fb923c}
+  .status-resolved{background:rgba(16,212,140,.15);color:var(--green)}
+
+  /* Service Health */
+  .svc-item{padding:9px 14px;border-bottom:1px solid rgba(26,45,79,.4);display:flex;align-items:center;justify-content:space-between}
+  .svc-name{font-size:11px;font-weight:500}
+  .svc-op{font-size:10px;color:var(--muted)}
+  .health-dot{width:8px;height:8px;border-radius:50%}
+  .health-ok{background:var(--green)}
+  .health-warn{background:var(--amber);animation:pulse 1.5s infinite}
+  .health-crit{background:var(--red);animation:pulse 1s infinite}
+
+  /* RCA Panel */
+  .rca-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-top:20px;overflow:hidden;display:none}
+  .rca-panel.open{display:block}
+  .rca-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .rca-title{font-size:15px;font-weight:700}
+  .rca-close{cursor:pointer;color:var(--muted);font-size:18px;line-height:1}
+  .rca-body{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid var(--border)}
+  .rca-col{padding:20px;border-right:1px solid var(--border)}
+  .rca-col:last-child{border-right:none}
+  .rca-section-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:14px;font-weight:600}
+
+  /* Pipeline viz */
+  .pipeline-steps{display:flex;flex-direction:column;gap:8px}
+  .pipe-step{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);transition:all .3s;font-size:12px}
+  .pipe-step.done{border-color:rgba(16,212,140,.4);background:rgba(16,212,140,.05)}
+  .pipe-step.running{border-color:rgba(59,130,246,.6);background:rgba(59,130,246,.08);animation:borderPulse 1s infinite}
+  .pipe-step.pending{opacity:.45}
+  @keyframes borderPulse{0%,100%{border-color:rgba(59,130,246,.6)}50%{border-color:rgba(59,130,246,1)}}
+  .pipe-icon{font-size:14px;width:22px;text-align:center}
+  .pipe-name{flex:1;font-weight:500}
+  .pipe-time{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+  .pipe-check{color:var(--green);font-size:12px}
+  .pipe-spin{display:inline-block;animation:spin .6s linear infinite;font-size:11px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Hypotheses */
+  .hypothesis{margin-bottom:12px;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px}
+  .hyp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .hyp-cause{font-size:12px;font-weight:600}
+  .hyp-conf{font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:700}
+  .conf-bar-wrap{height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin-bottom:6px}
+  .conf-bar{height:100%;border-radius:2px;transition:width .8s ease}
+  .hyp-text{font-size:11px;color:var(--dim);line-height:1.5}
+
+  /* Runbook */
+  .runbook-step{display:flex;gap:10px;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+  .runbook-num{width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .runbook-num.assisted{background:var(--amber)}
+  .runbook-title{font-size:12px;font-weight:600;margin-bottom:2px}
+  .runbook-desc{font-size:11px;color:var(--dim);line-height:1.4}
+  .approval-btn{margin-top:8px;padding:5px 12px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);color:var(--amber);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s}
+  .approval-btn:hover{background:rgba(245,158,11,.25)}
+  .approved-tag{padding:3px 8px;background:rgba(16,212,140,.15);border:1px solid rgba(16,212,140,.3);color:var(--green);border-radius:4px;font-size:10px;font-weight:600}
+
+  /* Evidence */
+  .evidence-item{padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+  .evidence-src{font-size:10px;color:var(--blue);font-weight:600;margin-bottom:4px}
+  .evidence-content{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--dim);line-height:1.5;white-space:pre-wrap}
+  .relevance{display:flex;align-items:center;gap:6px;margin-top:6px}
+  .relevance-label{font-size:9px;color:var(--muted)}
+  .relevance-bar{flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px}
+  .relevance-fill{height:100%;background:var(--blue);border-radius:2px}
+
+  /* Ticket */
+  .ticket-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:12px}
+  .ticket-field{margin-bottom:10px}
+  .ticket-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px}
+  .ticket-value{color:var(--text)}
+  .ticket-priority{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700}
+  .priority-Critical{background:rgba(239,68,68,.2);color:#f87171}
+  .priority-High{background:rgba(249,115,22,.2);color:#fb923c}
+  .create-ticket-btn{width:100%;padding:8px;background:var(--blue);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:10px}
+  .create-ticket-btn:hover{background:#2563eb}
+
+  /* Predictive tab */
+  .predictive-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+  .pred-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .pred-svc{font-size:14px;font-weight:700;margin-bottom:4px}
+  .pred-op{font-size:11px;color:var(--muted);margin-bottom:14px}
+  .pred-prob-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .pred-prob{font-size:24px;font-weight:700}
+  .pred-prob.crit{color:var(--red)}
+  .pred-prob.high{color:var(--amber)}
+  .pred-prob.med{color:var(--amber)}
+  .pred-eta{font-size:11px;color:var(--muted)}
+  .pred-bar-wrap{height:6px;background:rgba(255,255,255,.08);border-radius:3px;margin-bottom:12px}
+  .pred-bar{height:100%;border-radius:3px}
+  .pred-signals{font-size:11px;color:var(--dim);line-height:1.5}
+  .pred-signal{display:flex;gap:6px;margin-bottom:4px}
+  .pred-dot{color:var(--amber);margin-top:2px}
+  .pred-action{margin-top:12px;font-size:11px;padding:8px 10px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);border-radius:7px;color:var(--blue);line-height:1.4}
+
+  /* Executive tab */
+  .exec-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+  .chart-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px}
+  .chart-title{font-size:13px;font-weight:600;margin-bottom:16px;color:var(--text)}
+  .bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .bar-fill{width:100%;border-radius:3px 3px 0 0;min-height:4px;transition:height .8s ease}
+  .bar-label{font-size:9px;color:var(--muted)}
+  .bar-val{font-size:9px;font-weight:600;color:var(--dim)}
+  .metric-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(26,45,79,.5)}
+  .metric-row:last-child{border-bottom:none}
+  .metric-name{font-size:12px;color:var(--dim)}
+  .metric-val{font-size:12px;font-weight:600}
+
+  /* Approval modal */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:200}
+  .modal-overlay.open{display:flex}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;width:480px;max-width:95vw}
+  .modal-title{font-size:16px;font-weight:700;margin-bottom:6px}
+  .modal-subtitle{font-size:12px;color:var(--muted);margin-bottom:20px}
+  .modal-action{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;margin-bottom:16px}
+  .modal-action-title{font-size:12px;font-weight:600;color:var(--amber);margin-bottom:4px}
+  .modal-action-desc{font-size:11px;color:var(--dim);line-height:1.4}
+  .modal-risk{font-size:11px;padding:6px 12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:6px;color:var(--amber);margin-bottom:16px}
+  .modal-btns{display:flex;gap:10px}
+  .btn-approve{flex:1;padding:10px;background:var(--green);color:#000;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+  .btn-reject{flex:1;padding:10px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+
+  /* Simulate btn */
+  .sim-btn{padding:7px 16px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border:none;color:#fff;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .2s}
+  .sim-btn:hover{opacity:.85}
+  .run-btn{padding:7px 16px;background:rgba(16,212,140,.15);border:1px solid rgba(16,212,140,.4);color:var(--green);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+  .run-btn:hover{background:rgba(16,212,140,.25)}
+
+  code{font-family:'JetBrains Mono',monospace;font-size:10px;background:rgba(255,255,255,.05);padding:2px 5px;border-radius:3px}
+  </style>
+  </head>
+  <body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon">🛰️</div>
+      AI Telecom Ops Copilot
+      <span style="font-size:10px;color:var(--muted);font-weight:400">CRBT/VAS Platform</span>
+    </div>
+    <div class="topbar-right">
+      <div class="status-pill"><div class="pulse"></div>7 Agents Active</div>
+      <div style="font-size:12px;color:var(--muted)">Operators: <span style="color:var(--text)">Halotel · Ncell · Vodacom</span></div>
+      <div class="clock" id="clock">--:--:-- UTC</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('ops')">🖥 Operations</div>
+    <div class="tab" onclick="switchTab('rca-live')">🔬 RCA Analysis</div>
+    <div class="tab" onclick="switchTab('predictive')">📈 Predictive Failure</div>
+    <div class="tab" onclick="switchTab('executive')">📊 Executive Dashboard</div>
+    <div class="tab" onclick="switchTab('pipeline')">🤖 Agent Pipeline</div>
+  </div>
+
+  <!-- ══════════════════ OPS TAB ══════════════════ -->
+  <div class="main">
+  <div class="view active" id="view-ops">
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi red"><div class="kpi-label">Active Incidents</div><div class="kpi-val" id="kpi-incidents">3</div><div class="kpi-sub">2 Critical · 1 High</div></div>
+      <div class="kpi amber"><div class="kpi-label">Avg MTTR</div><div class="kpi-val">28<span style="font-size:16px">m</span></div><div class="kpi-sub">↓53% vs manual (60m)</div></div>
+      <div class="kpi green"><div class="kpi-label">SLA Compliance</div><div class="kpi-val">97.3<span style="font-size:16px">%</span></div><div class="kpi-sub">Target: 99.5% monthly</div></div>
+      <div class="kpi blue"><div class="kpi-label">L1 Ticket Reduction</div><div class="kpi-val">61<span style="font-size:16px">%</span></div><div class="kpi-sub">Auto-resolved today: 14</div></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
+      <button class="sim-btn" onclick="injectAlert()">⚡ Simulate Alert Storm</button>
+      <button class="run-btn" onclick="runPipelineDemo()">▶ Run AI Pipeline</button>
+      <span style="font-size:11px;color:var(--muted)" id="pipeline-status"></span>
+    </div>
+
+    <div class="ops-grid">
+      <!-- Alert Feed -->
+      <div class="panel">
+        <div class="panel-header">Live Alert Feed <span id="alert-count-badge" class="badge">0</span></div>
+        <div class="panel-body" id="alert-feed"></div>
+      </div>
+
+      <!-- Incidents -->
+      <div class="panel">
+        <div class="panel-header">Active Incidents <button class="sim-btn" style="font-size:10px;padding:3px 10px" onclick="addIncident()">+ New</button></div>
+        <div class="panel-body" id="incident-list"></div>
+      </div>
+
+      <!-- Service Health -->
+      <div class="panel">
+        <div class="panel-header">Service Health</div>
+        <div class="panel-body" id="service-health"></div>
+      </div>
+    </div>
+
+    <!-- RCA Panel -->
+    <div class="rca-panel" id="rca-panel">
+      <div class="rca-header">
+        <div>
+          <div class="rca-title" id="rca-incident-title">Incident RCA</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">AI Copilot Analysis · Evidence-backed · <span id="rca-confidence" style="color:var(--green)"></span></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span id="rca-status-tag" class="incident-status status-investigating">Investigating</span>
+          <span class="rca-close" onclick="closeRca()">✕</span>
+        </div>
+      </div>
+      <div class="rca-body">
+        <!-- Agent Pipeline -->
+        <div class="rca-col">
+          <div class="rca-section-title">🤖 Agent Pipeline</div>
+          <div class="pipeline-steps" id="pipeline-steps"></div>
+        </div>
+        <!-- Hypotheses + Evidence -->
+        <div class="rca-col">
+          <div class="rca-section-title">🔬 Root Cause Hypotheses</div>
+          <div id="rca-hypotheses"></div>
+          <div class="rca-section-title" style="margin-top:16px">📋 Evidence (3 sources)</div>
+          <div id="rca-evidence"></div>
+        </div>
+        <!-- Runbook + Ticket -->
+        <div class="rca-col">
+          <div class="rca-section-title" id="runbook-title-label">📖 Runbook Steps</div>
+          <div id="rca-runbook"></div>
+          <div class="rca-section-title" style="margin-top:16px">🎫 Auto-Generated Ticket</div>
+          <div id="rca-ticket"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ RCA TAB ══════════════════ -->
+  <div class="view" id="view-rca-live">
+    <div style="margin-bottom:20px">
+      <h2 style="font-size:18px;font-weight:700;margin-bottom:6px">Root Cause Analysis Deep Dive</h2>
+      <p style="font-size:13px;color:var(--muted)">RAG-powered analysis over historical incident knowledge base + Neo4j dependency graph</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="panel">
+        <div class="panel-header">RCA Accuracy Over Time</div>
+        <div style="padding:20px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Accuracy improves as knowledge base grows with real incident data</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Cold Start (Day 1)</span><span style="color:var(--amber)">72–78%</span></div>
+              <div style="height:8px;background:rgba(255,255,255,.08);border-radius:4px"><div style="width:75%;height:100%;background:var(--amber);border-radius:4px"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>After 1 Month</span><span style="color:var(--amber)">79–83%</span></div>
+              <div style="height:8px;background:rgba(255,255,255,.08);border-radius:4px"><div style="width:81%;height:100%;background:var(--amber);border-radius:4px"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>After 3 Months</span><span style="color:var(--blue)">83–86%</span></div>
+              <div style="height:8px;background:rgba(255,255,255,.08);border-radius:4px"><div style="width:84%;height:100%;background:var(--blue);border-radius:4px"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Mature (6+ Months)</span><span style="color:var(--green)">85–87%</span></div>
+              <div style="height:8px;background:rgba(255,255,255,.08);border-radius:4px"><div style="width:86%;height:100%;background:var(--green);border-radius:4px"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Knowledge Graph (Neo4j)</div>
+        <div style="padding:20px;font-size:12px">
+          <div style="color:var(--muted);margin-bottom:14px">Incident dependency paths for Halotel Tanzania</div>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--cyan);line-height:1.8">
+            Halotel<br>
+            &nbsp;&nbsp;→ billing_api<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;→ <span style="color:var(--red)">connection_pool_exhaustion</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ crbt_provisioning<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ <span style="color:var(--red)">activation_failure</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ <span style="color:var(--green)">Fix: pool_size 50→150</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ <span style="color:var(--green)">Fix: read_replica_added</span>
+          </div>
+          <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:22px;font-weight:700;color:var(--blue)">847</div>
+              <div style="font-size:10px;color:var(--muted)">Incident Nodes</div>
+            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+              <div style="font-size:22px;font-weight:700;color:var(--purple)">2,341</div>
+              <div style="font-size:10px;color:var(--muted)">Relationships</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel" style="grid-column:1/-1">
+        <div class="panel-header">Top Root Causes — Last 30 Days</div>
+        <div style="padding:20px">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>DB Connection Pool Exhaustion</span><span style="color:var(--red);font-weight:600">34%</span></div>
+              <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px"><div style="width:34%;height:100%;background:var(--red);border-radius:3px;opacity:.8"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Billing API Timeout</span><span style="color:var(--amber);font-weight:600">22%</span></div>
+              <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px"><div style="width:22%;height:100%;background:var(--amber);border-radius:3px;opacity:.8"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Kafka Consumer Lag</span><span style="color:var(--blue);font-weight:600">18%</span></div>
+              <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px"><div style="width:18%;height:100%;background:var(--blue);border-radius:3px;opacity:.8"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>SMSC Queue Saturation</span><span style="color:var(--purple);font-weight:600">14%</span></div>
+              <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px"><div style="width:14%;height:100%;background:var(--purple);border-radius:3px;opacity:.8"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Redis Cache Miss Storm</span><span style="color:var(--cyan);font-weight:600">8%</span></div>
+              <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px"><div style="width:8%;height:100%;background:var(--cyan);border-radius:3px;opacity:.8"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>External Gateway Timeout</span><span style="color:var(--muted);font-weight:600">4%</span></div>
+              <div style="height:6px;background:rgba(255,255,255,.06);border-radius:3px"><div style="width:4%;height:100%;background:var(--muted);border-radius:3px;opacity:.8"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PREDICTIVE TAB ══════════════════ -->
+  <div class="view" id="view-predictive">
+    <div style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end">
+      <div>
+        <h2 style="font-size:18px;font-weight:700;margin-bottom:6px">Predictive Failure Engine</h2>
+        <p style="font-size:13px;color:var(--muted)">LSTM + Isolation Forest — 6-hour prediction horizon · Updated every 15 minutes</p>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">Model F1: <span style="color:var(--green);font-weight:600">83.2%</span> · Last retrained: 3h ago</div>
+    </div>
+    <div class="predictive-grid">
+      <div class="pred-card">
+        <div class="pred-svc">crbt_provisioning</div>
+        <div class="pred-op">Halotel Tanzania</div>
+        <div class="pred-prob-row"><div class="pred-prob crit">87%</div><div class="pred-eta">⏱ ~2.5 hours</div></div>
+        <div class="pred-bar-wrap"><div class="pred-bar" style="width:87%;background:var(--red)"></div></div>
+        <div class="pred-signals">
+          <div class="pred-signal"><span class="pred-dot">▲</span><span>Activation success rate declining: 94% → 78% (3h trend)</span></div>
+          <div class="pred-signal"><span class="pred-dot">▲</span><span>DB connection wait: +340% over 2 hours</span></div>
+          <div class="pred-signal"><span class="pred-dot">▲</span><span>Queue depth: 12 → 47 → 134 (exponential)</span></div>
+        </div>
+        <div class="pred-action">⚡ Recommended: Increase DB pool proactively before activation rate drops below 50%</div>
+      </div>
+      <div class="pred-card">
+        <div class="pred-svc">billing_api</div>
+        <div class="pred-op">Halotel Tanzania</div>
+        <div class="pred-prob-row"><div class="pred-prob high">72%</div><div class="pred-eta">⏱ ~4 hours</div></div>
+        <div class="pred-bar-wrap"><div class="pred-bar" style="width:72%;background:var(--amber)"></div></div>
+        <div class="pred-signals">
+          <div class="pred-signal"><span class="pred-dot">▲</span><span>p99 latency: 820ms → 1240ms → 2100ms</span></div>
+          <div class="pred-signal"><span class="pred-dot">▲</span><span>Error rate: 0.1% → 0.8% → 2.3%</span></div>
+        </div>
+        <div class="pred-action">⚡ Recommended: Review charging platform upstream, pre-warm connection pool</div>
+      </div>
+      <div class="pred-card">
+        <div class="pred-svc">smsc</div>
+        <div class="pred-op">Ncell Nepal</div>
+        <div class="pred-prob-row"><div class="pred-prob med">43%</div><div class="pred-eta">⏱ ~8 hours</div></div>
+        <div class="pred-bar-wrap"><div class="pred-bar" style="width:43%;background:var(--amber)"></div></div>
+        <div class="pred-signals">
+          <div class="pred-signal"><span class="pred-dot">▲</span><span>Queue depth at 61% — fails at 85% historically</span></div>
+          <div class="pred-signal"><span class="pred-dot">▲</span><span>Delivery retry rate +15% vs yesterday</span></div>
+        </div>
+        <div class="pred-action">📊 Monitor: Alert if queue exceeds 75% before peak hours</div>
+      </div>
+      <div class="pred-card">
+        <div class="pred-svc">vas_subscription</div>
+        <div class="pred-op">Vodacom Tanzania</div>
+        <div class="pred-prob-row"><div class="pred-prob" style="color:var(--green)">12%</div><div class="pred-eta">⏱ Low risk</div></div>
+        <div class="pred-bar-wrap"><div class="pred-bar" style="width:12%;background:var(--green)"></div></div>
+        <div class="pred-signals">
+          <div class="pred-signal"><span class="pred-dot" style="color:var(--green)">●</span><span>All metrics within normal range</span></div>
+          <div class="pred-signal"><span class="pred-dot" style="color:var(--green)">●</span><span>Subscription renewal success: 98.7%</span></div>
+        </div>
+        <div class="pred-action" style="color:var(--green);background:rgba(16,212,140,.08);border-color:rgba(16,212,140,.2)">✓ Healthy — no action required</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ EXECUTIVE TAB ══════════════════ -->
+  <div class="view" id="view-executive">
+    <div style="margin-bottom:20px">
+      <h2 style="font-size:18px;font-weight:700;margin-bottom:6px">Executive Dashboard</h2>
+      <p style="font-size:13px;color:var(--muted)">Business impact · SLA tracking · Revenue protection — Last 30 days</p>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi green"><div class="kpi-label">Revenue Protected</div><div class="kpi-val">$2.4M</div><div class="kpi-sub">via proactive prevention</div></div>
+      <div class="kpi green"><div class="kpi-label">Service Availability</div><div class="kpi-val">99.71%</div><div class="kpi-sub">Target: 99.5%</div></div>
+      <div class="kpi blue"><div class="kpi-label">Subscribers Protected</div><div class="kpi-val">1.2M</div><div class="kpi-sub">CRBT + VAS across 3 operators</div></div>
+      <div class="kpi amber"><div class="kpi-label">MTTR Reduction</div><div class="kpi-val">53%</div><div class="kpi-sub">60m → 28m avg resolution</div></div>
+    </div>
+    <div class="exec-grid">
+      <div class="chart-card">
+        <div class="chart-title">Monthly Incident Volume</div>
+        <div class="bar-chart" id="bar-chart-incidents"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">MTTR Trend (minutes)</div>
+        <div class="bar-chart" id="bar-chart-mttr"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">SLA by Operator</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+          
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Halotel Tanzania</span><span style="color:var(--green);font-weight:600">97.3%</span></div>
+            <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px"><div style="width:97.3%;height:100%;background:var(--green);border-radius:4px"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Ncell Nepal</span><span style="color:var(--green);font-weight:600">99.1%</span></div>
+            <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px"><div style="width:99.1%;height:100%;background:var(--green);border-radius:4px"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>Vodacom Tanzania</span><span style="color:var(--green);font-weight:600">98.8%</span></div>
+            <div style="height:8px;background:rgba(255,255,255,.06);border-radius:4px"><div style="width:98.8%;height:100%;background:var(--green);border-radius:4px"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">AI Performance Metrics</div>
+        <div style="margin-top:8px">
+          
+          <div class="metric-row"><span class="metric-name">Alert Classification Accuracy</span><span class="metric-val" style="color:var(--green)">94.2%</span></div>
+          <div class="metric-row"><span class="metric-name">RCA Accuracy (current KB)</span><span class="metric-val" style="color:var(--blue)">86.7%</span></div>
+          <div class="metric-row"><span class="metric-name">Predictive F1 Score</span><span class="metric-val" style="color:var(--blue)">83.2%</span></div>
+          <div class="metric-row"><span class="metric-name">Ticket Auto-generation Quality</span><span class="metric-val" style="color:var(--green)">93.1%</span></div>
+          <div class="metric-row"><span class="metric-name">False Positive Rate</span><span class="metric-val" style="color:var(--green)">3.8%</span></div>
+          <div class="metric-row"><span class="metric-name">Engineer Adoption Rate</span><span class="metric-val" style="color:var(--green)">87%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PIPELINE TAB ══════════════════ -->
+  <div class="view" id="view-pipeline">
+    <div style="margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end">
+      <div>
+        <h2 style="font-size:18px;font-weight:700;margin-bottom:6px">7-Agent LangGraph Pipeline</h2>
+        <p style="font-size:13px;color:var(--muted)">Full pipeline execution trace — click Run to simulate a P1 incident</p>
+      </div>
+      <button class="sim-btn" onclick="runFullPipelineDemo()">▶ Run Full Pipeline</button>
+    </div>
+    <div style="display:grid;grid-template-columns:380px 1fr;gap:14px">
+      <div class="panel">
+        <div class="panel-header">Pipeline Execution</div>
+        <div style="padding:16px" id="full-pipeline-steps">
+          <div style="font-size:12px;color:var(--muted);text-align:center;padding:40px 0">Click "Run Full Pipeline" to see the 7 agents execute in real time</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header">Live Agent Output</div>
+        <div style="padding:16px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--dim);line-height:1.6;max-height:500px;overflow-y:auto" id="agent-log">
+          <span style="color:var(--muted)">Waiting for pipeline run...</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px" id="pipeline-results" style="display:none">
+    </div>
+  </div>
+
+  </div><!-- end main -->
+
+  <!-- Approval Modal -->
+  <div class="modal-overlay" id="approval-modal">
+    <div class="modal">
+      <div class="modal-title">⚠️ Human Approval Required</div>
+      <div class="modal-subtitle">This action requires your explicit approval before execution. Safety class: ASSISTED</div>
+      <div class="modal-action">
+        <div class="modal-action-title" id="modal-action-title">Increase DB Connection Pool</div>
+        <div class="modal-action-desc" id="modal-action-desc">Submit request to increase PgBouncer pool_size from 50 to 150 on db_primary (Halotel). This configuration change will increase memory usage by ~300MB.</div>
+      </div>
+      <div class="modal-risk">⚠ Risk Level: MEDIUM · This action modifies a running service configuration. Changes take effect immediately on pool reload.</div>
+      <div class="modal-btns">
+        <button class="btn-approve" onclick="approveAction()">✓ Approve & Execute</button>
+        <button class="btn-reject" onclick="closeModal()">✕ Reject</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ─── Data ───────────────────────────────────────────────────────────────────
+  const OPERATORS = ['halotel','ncell','vodacom'];
+  const SERVICES = ['billing_api','crbt_provisioning','db_primary','smsc','ussd_gateway','charging_platform','vas_subscription','kafka','crm_api'];
+  const METRICS = ['api_latency_p99','activation_success_rate','cpu_utilization','error_rate','queue_depth','consumer_lag','delivery_failure_rate','connection_count'];
+  const SEVERITIES = ['P1','P1','P2','P2','P3','P4'];
+  const OP_LABELS = {halotel:'Halotel 🇹🇿',ncell:'Ncell 🇳🇵',vodacom:'Vodacom 🇹🇿'};
+  const SVC_HEALTH = {
+    billing_api:{status:'warn',op:'halotel'},crbt_provisioning:{status:'crit',op:'halotel'},
+    db_primary:{status:'crit',op:'halotel'},smsc:{status:'ok',op:'ncell'},
+    ussd_gateway:{status:'ok',op:'ncell'},charging_platform:{status:'warn',op:'halotel'},
+    vas_subscription:{status:'ok',op:'vodacom'},kafka:{status:'ok',op:'all'},
+    crm_api:{status:'ok',op:'vodacom'},elasticsearch:{status:'ok',op:'all'},
+    redis_cache:{status:'ok',op:'all'},api_gateway:{status:'warn',op:'halotel'}
+  };
+
+  const INCIDENTS = [
+    {id:'INC-001',title:'DB Bottleneck — Activation Failure',sev:'P1',op:'halotel',status:'investigating',time:'2m ago',category:'database_bottleneck'},
+    {id:'INC-002',title:'Billing API Timeout — VAS Degraded',sev:'P1',op:'halotel',status:'open',time:'7m ago',category:'billing_timeout'},
+    {id:'INC-003',title:'Charging Platform Slow Response',sev:'P2',op:'vodacom',status:'investigating',time:'18m ago',category:'generic'},
+  ];
+
+  const RCA_DATA = {
+    database_bottleneck:{
+      title:'Database Bottleneck Impacting Subscriber Activations',
+      confidence:'91%',
+      hypotheses:[
+        {cause:'Connection Pool Exhaustion',conf:0.92,color:'var(--red)',text:'All 50 DB connections in use with 23 queued. Slow queries (avg 8.4s) holding connections open. Pattern matches INC-2024-0891 (91% similarity).'},
+        {cause:'Missing DB Index — Full Table Scan',conf:0.05,color:'var(--blue)',text:'Low confidence — no slow query logs confirm this currently.'},
+        {cause:'Database Lock Contention',conf:0.03,color:'var(--muted)',text:'Very low confidence — no lock wait metrics observed.'},
+      ],
+      evidence:[
+        {src:'prometheus:db_primary',content:'api_latency_p99: 8420ms ⚠ (threshold: 2000ms)
+error_rate_5m: 34.7% ⚠ (threshold: 1%)
+cpu_utilization: 91.3% (threshold: 80%)
+active_connections: 487/500 CRITICAL',rel:0.95},
+        {src:'elasticsearch:crbt_provisioning',content:'[ERROR] Connection pool exhausted: all 50 in use
+[ERROR] Timeout after 8000ms calling billing_api
+[WARN] Retry attempt 3/3 failed for provisioning
+[ERROR] Circuit breaker OPEN',rel:0.92},
+        {src:'incident_database',content:'INC-2024-0891 (2024-11-14) — Similarity: 91%
+Root Cause: Connection pool exhaustion
+Resolution: Increased pool 50→150, added read replica
+MTTR: 47 minutes',rel:0.91},
+      ],
+      runbook:'DB Connection Pool Exhaustion — CRBT/VAS Recovery',
+      steps:[
+        {n:1,title:'Verify Connection Pool Status',desc:'SELECT count(*), state FROM pg_stat_activity GROUP BY state;',type:'read'},
+        {n:2,title:'Identify Slow Queries',desc:'Find queries running > 5 seconds holding connections',type:'read'},
+        {n:3,title:'Check Activation Error Rate',desc:'rate(crbt_activation_success_total[5m]) in Prometheus',type:'read'},
+        {n:4,title:'Increase Connection Pool (APPROVAL)',desc:'pgbouncer_reload_config --pool-size=150',type:'assisted'},
+        {n:5,title:'Monitor Recovery',desc:'Watch activation rate for 10 min post-change',type:'read'},
+      ],
+    },
+    billing_timeout:{
+      title:'Billing API Timeout — VAS Services Degraded',
+      confidence:'89%',
+      hypotheses:[
+        {cause:'Billing API Downstream Timeout',conf:0.89,color:'var(--red)',text:'Billing API at 8420ms (threshold 2000ms). Charging platform saturated. Circuit breaker OPEN.'},
+        {cause:'Network Partition',conf:0.07,color:'var(--blue)',text:'Minor possibility of network issues between billing and charging services.'},
+        {cause:'Memory Leak',conf:0.04,color:'var(--muted)',text:'Low confidence — no heap metrics indicate memory issue.'},
+      ],
+      evidence:[
+        {src:'prometheus:billing_api',content:'api_latency_p99: 8420ms ⚠
+error_rate: 34.2% ⚠
+circuit_breaker: OPEN
+timeout_rate: 41.3%',rel:0.95},
+        {src:'elasticsearch:billing_api',content:'[ERROR] Timeout calling charging_platform after 8000ms
+[ERROR] Circuit breaker OPEN — rejecting new requests
+[WARN] Retry queue depth: 847 messages',rel:0.90},
+        {src:'incident_database',content:'INC-2024-0634 (2024-09-22) — Similarity: 78%
+Root Cause: Charging platform DB saturation
+Resolution: Added charging DB read replica
+MTTR: 112 minutes',rel:0.78},
+      ],
+      runbook:'Billing API Timeout — VAS Recovery Procedure',
+      steps:[
+        {n:1,title:'Confirm Billing API Health',desc:'curl http://billing-api:8080/actuator/health',type:'read'},
+        {n:2,title:'Check Charging Platform',desc:'curl http://charging-platform:9090/health',type:'read'},
+        {n:3,title:'Review Circuit Breaker',desc:'kubectl exec billing-api-pod -- curl localhost/circuitbreakers',type:'read'},
+        {n:4,title:'Retry VAS Transactions (APPROVAL)',desc:'Reset kafka consumer group to retry dead-letter queue',type:'assisted'},
+      ],
+    },
+    generic:{
+      title:'Service Degradation — Investigation in Progress',
+      confidence:'65%',
+      hypotheses:[
+        {cause:'Service Degradation — Investigating',conf:0.65,color:'var(--amber)',text:'Evidence collection in progress. Insufficient data for definitive root cause.'},
+      ],
+      evidence:[
+        {src:'prometheus:api_gateway',content:'error_rate_5m: 12.3% (threshold: 1%)
+api_latency_p99: 3200ms
+cpu_utilization: 74%',rel:0.80},
+      ],
+      runbook:'General Incident Investigation',
+      steps:[
+        {n:1,title:'Check Service Health Dashboard',desc:'Review Grafana for all affected services',type:'read'},
+        {n:2,title:'Review Application Logs',desc:'Query Elasticsearch for ERROR logs in last 30m',type:'read'},
+      ],
+    },
+  };
+
+  // ─── State ───────────────────────────────────────────────────────────────────
+  let alerts = [];
+  let incidents = [...INCIDENTS];
+  let alertCount = 0;
+  let selectedIncident = null;
+  let approvedActions = new Set();
+
+  // ─── Init ────────────────────────────────────────────────────────────────────
+  function init(){
+    renderServiceHealth();
+    renderIncidents();
+    renderAlertFeed();
+    renderExecCharts();
+    setInterval(tickClock,1000);
+    setInterval(autoAlert,4000);
+    tickClock();
+  }
+
+  function tickClock(){
+    document.getElementById('clock').textContent = new Date().toUTCString().split(' ')[4]+' UTC';
+  }
+
+  // ─── Tabs ────────────────────────────────────────────────────────────────────
+  function switchTab(id){
+    document.querySelectorAll('.tab').forEach((t,i)=>{
+      const ids=['ops','rca-live','predictive','executive','pipeline'];
+      t.classList.toggle('active',ids[i]===id);
+    });
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-'+id).classList.add('active');
+  }
+
+  // ─── Alert Feed ───────────────────────────────────────────────────────────────
+  function autoAlert(){
+    const svc = SERVICES[Math.floor(Math.random()*SERVICES.length)];
+    const sev = SEVERITIES[Math.floor(Math.random()*SEVERITIES.length)];
+    const op  = OPERATORS[Math.floor(Math.random()*OPERATORS.length)];
+    const metric = METRICS[Math.floor(Math.random()*METRICS.length)];
+    const val = metric.includes('rate')||metric.includes('utilization') ? (Math.random()*100).toFixed(1)+'%' : Math.floor(Math.random()*10000)+'ms';
+    addAlert({svc,sev,op,metric,val,isNew:true});
+  }
+
+  function addAlert({svc,sev,op,metric,val,isNew}){
+    alertCount++;
+    document.getElementById('alert-count-badge').textContent=alertCount;
+    const feed = document.getElementById('alert-feed');
+    const div = document.createElement('div');
+    div.className='alert-item';
+    div.innerHTML=`
+      <div class="alert-svc">
+        <span class="sev-badge sev-${sev}">${sev}</span>
+        ${svc.replace(/_/g,' ')}
+        ${isNew?'<span class="new-tag">NEW</span>':''}
+      </div>
+      <div class="alert-meta">${OP_LABELS[op]||op} · ${metric}</div>
+      <div class="alert-val">${val}</div>
+    `;
+    feed.insertBefore(div,feed.firstChild);
+    if(feed.children.length>25) feed.removeChild(feed.lastChild);
+    setTimeout(()=>div.querySelector('.new-tag')&&div.querySelector('.new-tag').remove(),3000);
+  }
+
+  function injectAlert(){
+    const scenarios=[
+      {svc:'db_primary',sev:'P1',op:'halotel',metric:'cpu_utilization',val:'94.2%'},
+      {svc:'crbt_provisioning',sev:'P1',op:'halotel',metric:'activation_success_rate',val:'23.1%'},
+      {svc:'billing_api',sev:'P1',op:'halotel',metric:'api_latency_p99',val:'8420ms'},
+      {svc:'kafka',sev:'P2',op:'halotel',metric:'consumer_lag',val:'847,234'},
+    ];
+    scenarios.forEach((s,i)=>setTimeout(()=>addAlert({...s,isNew:true}),i*400));
+    setTimeout(()=>{
+      document.getElementById('pipeline-status').textContent='🤖 AI Copilot: Correlating 4 alerts → 1 incident...';
+      setTimeout(()=>{
+        document.getElementById('pipeline-status').textContent='✅ Incident created: DB Bottleneck (P1) · Confidence: 94%';
+        addIncident();
+      },2000);
+    },1800);
+  }
+
+  // ─── Incidents ────────────────────────────────────────────────────────────────
+  function renderIncidents(){
+    const list = document.getElementById('incident-list');
+    list.innerHTML = incidents.map(inc=>`
+      <div class="incident-item ${selectedIncident?.id===inc.id?'selected':''}" onclick="selectIncident('${inc.id}')">
+        <div class="incident-title">
+          <span class="sev-badge sev-${inc.sev}">${inc.sev}</span>
+          ${inc.title}
+        </div>
+        <div class="incident-meta">
+          <span class="op-badge">${OP_LABELS[inc.op]||inc.op}</span>
+          <span class="incident-status status-${inc.status}">${inc.status}</span>
+          <span class="incident-time">${inc.time}</span>
+        </div>
+      </div>
+    `).join('');
+    document.getElementById('kpi-incidents').textContent = incidents.length;
+  }
+
+  function addIncident(){
+    const templates=[
+      {title:'Kafka Consumer Lag — Processing Stalled',sev:'P2',op:'ncell',category:'generic'},
+      {title:'SMSC Queue Saturation — SMS Degraded',sev:'P2',op:'ncell',category:'generic'},
+      {title:'Redis Cache Miss Storm — High DB Load',sev:'P3',op:'vodacom',category:'generic'},
+    ];
+    const t = templates[Math.floor(Math.random()*templates.length)];
+    incidents.unshift({...t,id:'INC-'+(100+incidents.length+1),status:'open',time:'just now'});
+    renderIncidents();
+  }
+
+  function selectIncident(id){
+    selectedIncident = incidents.find(i=>i.id===id);
+    renderIncidents();
+    openRca(selectedIncident);
+  }
+
+  // ─── Service Health ───────────────────────────────────────────────────────────
+  function renderServiceHealth(){
+    const el = document.getElementById('service-health');
+    el.innerHTML = Object.entries(SVC_HEALTH).map(([svc,{status,op}])=>`
+      <div class="svc-item">
+        <div><div class="svc-name">${svc.replace(/_/g,' ')}</div><div class="svc-op">${OP_LABELS[op]||op}</div></div>
+        <div class="health-dot health-${status}"></div>
+      </div>
+    `).join('');
+  }
+
+  // ─── RCA Panel ────────────────────────────────────────────────────────────────
+  function openRca(incident){
+    const panel = document.getElementById('rca-panel');
+    panel.classList.add('open');
+    panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+    const data = RCA_DATA[incident.category] || RCA_DATA.generic;
+
+    document.getElementById('rca-incident-title').textContent = data.title;
+    document.getElementById('rca-confidence').textContent = 'RCA Confidence: '+data.confidence;
+    document.getElementById('rca-status-tag').textContent = incident.status;
+    document.getElementById('runbook-title-label').textContent = '📖 '+data.runbook;
+
+    // Reset pipeline
+    renderPipelineSteps('pending');
+    renderHypotheses(data.hypotheses);
+    renderEvidence(data.evidence);
+    renderRunbook(data.steps,incident.id);
+    renderTicket(incident,data);
+
+    // Animate pipeline
+    animatePipeline();
+  }
+
+  function closeRca(){document.getElementById('rca-panel').classList.remove('open');selectedIncident=null;renderIncidents();}
+
+  const AGENTS=[
+    {icon:'🔔',name:'Alert Intelligence',desc:'Dedup · Prioritize · Classify'},
+    {icon:'📊',name:'Evidence Collection',desc:'Logs · Metrics · Traces'},
+    {icon:'🔬',name:'Root Cause Analysis',desc:'RAG · Knowledge Graph · LLM'},
+    {icon:'📖',name:'Runbook Agent',desc:'SOP Retrieval · Step Mapping'},
+    {icon:'🎫',name:'Ticket Automation',desc:'Jira · ServiceNow · Report'},
+    {icon:'📈',name:'Predictive Failure',desc:'LSTM · Isolation Forest'},
+    {icon:'🧠',name:'Learning Agent',desc:'Feedback Loop · KB Update'},
+  ];
+
+  function renderPipelineSteps(state){
+    document.getElementById('pipeline-steps').innerHTML = AGENTS.map((a,i)=>`
+      <div class="pipe-step pending" id="pipe-${i}">
+        <span class="pipe-icon">${a.icon}</span>
+        <div style="flex:1"><div class="pipe-name">${a.name}</div><div style="font-size:9px;color:var(--muted)">${a.desc}</div></div>
+        <span class="pipe-time" id="pipe-time-${i}"></span>
+        <span id="pipe-status-${i}"></span>
+      </div>
+    `).join('');
+  }
+
+  function animatePipeline(){
+    const timings=[400,600,800,400,300,500,200];
+    let delay=200;
+    AGENTS.forEach((_,i)=>{
+      setTimeout(()=>{
+        document.getElementById('pipe-'+i).className='pipe-step running';
+        document.getElementById('pipe-status-'+i).innerHTML='<span class="pipe-spin">⟳</span>';
+        setTimeout(()=>{
+          document.getElementById('pipe-'+i).className='pipe-step done';
+          document.getElementById('pipe-time-'+i).textContent=(timings[i]/1000).toFixed(1)+'s';
+          document.getElementById('pipe-status-'+i).innerHTML='<span class="pipe-check">✓</span>';
+        },timings[i]);
+      },delay);
+      delay+=timings[i]+100;
+    });
+  }
+
+  function renderHypotheses(hyps){
+    document.getElementById('rca-hypotheses').innerHTML = hyps.map(h=>`
+      <div class="hypothesis">
+        <div class="hyp-top"><span class="hyp-cause">${h.cause}</span><span class="hyp-conf" style="color:${h.color}">${(h.conf*100).toFixed(0)}%</span></div>
+        <div class="conf-bar-wrap"><div class="conf-bar" style="width:${h.conf*100}%;background:${h.color}"></div></div>
+        <div class="hyp-text">${h.text}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderEvidence(evs){
+    document.getElementById('rca-evidence').innerHTML = evs.slice(0,2).map(e=>`
+      <div class="evidence-item">
+        <div class="evidence-src">${e.src}</div>
+        <div class="evidence-content">${e.content}</div>
+        <div class="relevance"><span class="relevance-label">Relevance</span><div class="relevance-bar"><div class="relevance-fill" style="width:${e.rel*100}%"></div></div><span style="font-size:9px;color:var(--dim)">${(e.rel*100).toFixed(0)}%</span></div>
+      </div>
+    `).join('');
+  }
+
+  function renderRunbook(steps,incId){
+    document.getElementById('rca-runbook').innerHTML = steps.map(s=>`
+      <div class="runbook-step">
+        <div class="runbook-num ${s.type==='assisted'?'assisted':''}">${s.n}</div>
+        <div style="flex:1">
+          <div class="runbook-title">${s.title}</div>
+          <div class="runbook-desc">${s.desc}</div>
+          ${s.type==='assisted'?
+            approvedActions.has(incId+'-'+s.n)?
+              '<span class="approved-tag">✓ Approved</span>':
+              `<button class="approval-btn" onclick="showApproval('${s.title}','${s.desc}','${incId}',${s.n})">⚠ Request Approval</button>`
+            :''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderTicket(inc,data){
+    document.getElementById('rca-ticket').innerHTML=`
+      <div class="ticket-box">
+        <div class="ticket-field"><div class="ticket-label">Summary</div><div class="ticket-value">[${inc.sev}] ${data.title} — ${(OP_LABELS[inc.op]||inc.op).split(' ')[0]}</div></div>
+        <div style="display:flex;gap:10px">
+          <div class="ticket-field"><div class="ticket-label">Priority</div><div class="ticket-priority priority-${inc.sev==='P1'?'Critical':'High'}">${inc.sev==='P1'?'Critical':'High'}</div></div>
+          <div class="ticket-field"><div class="ticket-label">Component</div><div class="ticket-value">${(inc.op||'').toUpperCase()}</div></div>
+        </div>
+        <div class="ticket-field"><div class="ticket-label">RCA Summary</div><div class="ticket-value" style="font-size:11px;color:var(--dim)">${data.hypotheses[0]?.text?.slice(0,100)||''}...</div></div>
+        <button class="create-ticket-btn" onclick="this.textContent='✓ Ticket Created in Jira';this.style.background='var(--green)';this.style.color='#000'">Create Jira Ticket</button>
+      </div>
+    `;
+  }
+
+  // ─── Approval ─────────────────────────────────────────────────────────────────
+  let pendingApproval = null;
+  function showApproval(title,desc,incId,stepN){
+    pendingApproval={incId,stepN};
+    document.getElementById('modal-action-title').textContent=title;
+    document.getElementById('modal-action-desc').textContent=desc;
+    document.getElementById('approval-modal').classList.add('open');
+  }
+  function approveAction(){
+    if(pendingApproval){
+      approvedActions.add(pendingApproval.incId+'-'+pendingApproval.stepN);
+      if(selectedIncident) renderRunbook(
+        (RCA_DATA[selectedIncident.category]||RCA_DATA.generic).steps,
+        selectedIncident.id
+      );
+    }
+    closeModal();
+  }
+  function closeModal(){document.getElementById('approval-modal').classList.remove('open');pendingApproval=null;}
+
+  // ─── Pipeline Tab ─────────────────────────────────────────────────────────────
+  function runFullPipelineDemo(){
+    const log = document.getElementById('agent-log');
+    const steps = document.getElementById('full-pipeline-steps');
+    log.innerHTML='';
+
+    const entries=[
+      {agent:'alert_intelligence',color:'var(--blue)',logs:[
+        'Ingesting 4 alerts from prometheus + elk...',
+        'Deduplicating: 4 alerts → 3 unique (1 duplicate removed)',
+        'Severity escalation: P2 + P1 + P2 → P1',
+        'Pattern match: database_bottleneck (confidence: 0.91)',
+        '✓ Incident category: database_bottleneck | Severity: P1',
+      ]},
+      {agent:'evidence_collection',color:'var(--cyan)',logs:[
+        'Querying Prometheus for [db_primary, crbt_provisioning, billing_api]...',
+        'Fetched 3 metric snapshots — all CRITICAL',
+        'Querying Elasticsearch — last 30min ERROR logs...',
+        'Found 847 ERROR events matching incident pattern',
+        'Querying incident history (Qdrant RAG)...',
+        'Retrieved 2 similar incidents (similarity: 0.91, 0.78)',
+        '✓ Evidence package: 8 items collected',
+      ]},
+      {agent:'root_cause_analysis',color:'var(--purple)',logs:[
+        'RAG retrieval: 2 historical incidents matched',
+        'Neo4j traversal: halotel→billing_api→connection_pool→crbt_provisioning',
+        'LLM reasoning over 8 evidence items (GPT-4o tool calls)...',
+        'Hypothesis 1: Connection Pool Exhaustion (0.92) ← PRIMARY',
+        'Hypothesis 2: Missing Index (0.05)',
+        'Hypothesis 3: Lock Contention (0.03)',
+        '✓ RCA confidence: 92% | Evidence-backed: YES',
+      ]},
+      {agent:'runbook_agent',color:'var(--amber)',logs:[
+        'Matching runbook for: database_bottleneck',
+        'Similarity search in SOP library...',
+        'Best match: "DB Connection Pool Exhaustion" (score: 0.96)',
+        'Loaded 5-step runbook',
+        'Step 4 flagged as ASSISTED → queued for human approval',
+        '✓ Runbook matched | Approvals pending: 1',
+      ]},
+      {agent:'ticket_automation',color:'var(--red)',logs:[
+        'Generating structured Jira ticket...',
+        'Priority: Critical | Component: HALOTEL',
+        'Embedding RCA, evidence, timeline, recommendations...',
+        'Labels: [database, connection-pool, crbt, p1-incident]',
+        '✓ Ticket draft ready for creation',
+      ]},
+      {agent:'predictive_failure',color:'var(--green)',logs:[
+        'Running LSTM + Isolation Forest over 6h metrics...',
+        'crbt_provisioning: 87% failure probability (↑ +10% from current incident)',
+        'billing_api: 72% failure probability in ~4h',
+        'smsc (ncell): 43% — monitor queue depth',
+        '✓ 4 services analyzed | 2 critical risk | 1 high risk',
+      ]},
+      {agent:'learning_agent',color:'var(--dim)',logs:[
+        'Recording pipeline execution to PostgreSQL...',
+        'incident_id: INC-DEMO-001 | duration: 3.2s | confidence: 0.92',
+        'Status: awaiting_engineer_feedback',
+        'Feedback loop active — accuracy improves with each resolved incident',
+        '✓ Learning record created',
+      ]},
+    ];
+
+    steps.innerHTML = entries.map((e,i)=>`
+      <div class="pipe-step pending" id="fp-${i}" style="margin-bottom:8px">
+        <span class="pipe-icon">${AGENTS[i].icon}</span>
+        <div style="flex:1"><div class="pipe-name" style="font-size:11px">${e.agent.replace(/_/g,' ')}</div></div>
+        <span class="pipe-time" id="fp-time-${i}"></span>
+        <span id="fp-status-${i}"></span>
+      </div>
+    `).join('');
+
+    let delay=0;
+    const durations=[420,680,920,380,290,510,180];
+    entries.forEach((entry,i)=>{
+      const d=durations[i];
+      setTimeout(()=>{
+        document.getElementById('fp-'+i).className='pipe-step running';
+        document.getElementById('fp-status-'+i).innerHTML='<span class="pipe-spin">⟳</span>';
+        entry.logs.forEach((line,li)=>{
+          setTimeout(()=>{
+            const p=document.createElement('div');
+            p.style.cssText=`color:${li===entry.logs.length-1?entry.color:'var(--dim)'};${li===entry.logs.length-1?'font-weight:600':''};`;
+            p.textContent=`[${entry.agent}] ${line}`;
+            log.appendChild(p);
+            log.scrollTop=log.scrollHeight;
+          },li*(d/entry.logs.length));
+        });
+        setTimeout(()=>{
+          document.getElementById('fp-'+i).className='pipe-step done';
+          document.getElementById('fp-time-'+i).textContent=(d/1000).toFixed(1)+'s';
+          document.getElementById('fp-status-'+i).innerHTML='<span class="pipe-check">✓</span>';
+        },d);
+      },delay);
+      delay+=d+100;
+    });
+  }
+
+  // ─── Pipeline Demo (ops tab) ───────────────────────────────────────────────────
+  function runPipelineDemo(){
+    if(!selectedIncident){incidents[0].status='investigating';selectIncident('INC-001');}
+    document.getElementById('pipeline-status').textContent='🤖 Running 7-agent pipeline...';
+    setTimeout(()=>document.getElementById('pipeline-status').textContent='✅ Pipeline complete — RCA confidence: 92%',4000);
+  }
+
+  // ─── Exec Charts ──────────────────────────────────────────────────────────────
+  function renderExecCharts(){
+    const iData=[{m:'Jan',v:142},{m:'Feb',v:128},{m:'Mar',v:117},{m:'Apr',v:98},{m:'May',v:84},{m:'Jun',v:71}];
+    const mData=[{m:'Jan',v:58},{m:'Feb',v:52},{m:'Mar',v:44},{m:'Apr',v:38},{m:'May',v:32},{m:'Jun',v:28}];
+    const maxI=142,maxM=58;
+
+    document.getElementById('bar-chart-incidents').innerHTML=iData.map(d=>`
+      <div class="bar-col">
+        <div class="bar-val">${d.v}</div>
+        <div class="bar-fill" style="height:${(d.v/maxI)*80}px;background:var(--blue);opacity:.8"></div>
+        <div class="bar-label">${d.m}</div>
+      </div>`).join('');
+
+    document.getElementById('bar-chart-mttr').innerHTML=mData.map(d=>`
+      <div class="bar-col">
+        <div class="bar-val">${d.v}m</div>
+        <div class="bar-fill" style="height:${(d.v/maxM)*80}px;background:var(--amber);opacity:.8"></div>
+        <div class="bar-label">${d.m}</div>
+      </div>`).join('');
+  }
+
+  // ─── Boot ────────────────────────────────────────────────────────────────────
+  init();
+  </script>
+  </body>
+  </html>
